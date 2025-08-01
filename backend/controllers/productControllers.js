@@ -1,4 +1,6 @@
+import catchAsyncErrors from "../middlewares/catchAsyncErrors.js";
 import Product from "../models/Product.js";
+import ErrorHandler from "../utils/errorHandler.js";
 
 export const getProduct = async(req,res)=>{
     const products = await Product.find()
@@ -33,19 +35,17 @@ export const getProductsDetails = async (req,res)=>{
   }
 
 
-  export const deleteProduct =  async (req,res)=>{
+  export const deleteProduct = catchAsyncErrors( async (req,res,next)=>{
     const product = await Product.findById(req?.params?.id)
     if(!product){
-     res.status(404).json({
-      message : "Mehsul taplmadi"
-     })
+      return next (new ErrorHandler("Mehsul tapilmadi",404))
     }
 
     await product.deleteOne()
     res.status(200).json({
       message: "Mehsul silindi"
     })
-  }
+  })
 
   
   export const updateProduct = async (req,res)=>{
