@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import { connectDatabase } from "./config/dbConnect.js"
 import productRoutes from "./routes/products.js"
 import userRoutes from "./routes/user.js"
+import authRoutes from "./routes/authrouter.js"
 import errorMiddleware from "./middlewares/error.js"
 import cookieParser from "cookie-parser"
 const app = express()
@@ -15,7 +16,7 @@ app.use(cookieParser())
 
 app.use("/api/v1",productRoutes)
 app.use("/api/v1",userRoutes)
-
+app.use("/api/v1",authRoutes)
 
 app.use(errorMiddleware)
 

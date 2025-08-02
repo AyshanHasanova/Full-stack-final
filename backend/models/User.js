@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import crypto from "crypto";
 
 
 const userSchema = new mongoose.Schema({
@@ -36,12 +37,16 @@ const userSchema = new mongoose.Schema({
     
 },{timestamps:true})
 
-userSchema.pre("save",async function (next) {
-    if(!this.isModified("password")){
-         next()
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+  
+    if (!this.password) {
+      return next(new Error("Shifrenizi daxil edin"));
     }
-    this.password = await bcrypt.hash(this.password,12)
-})
+  
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+  });
 
 userSchema.methods.JwtTokeniEldeEt = function () {
     return jwt.sign({
@@ -54,6 +59,24 @@ userSchema.methods.JwtTokeniEldeEt = function () {
 userSchema.methods.shifreleriMuqayiseEt = async function (password){
     return await bcrypt.compare(password,this.password)
 }
+
+userSchema.methods.getResetPasswordToken = function() {
+    //generate token
+ 
+ 
+    const resetToken = crypto.randomBytes(20).toString("hex")
+    //hash and set to resetPasswordToken field
+ 
+ 
+    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
+ 
+ 
+    //set token expire time
+    this.resetPasswordExpire = Date.now() + 30 * 60*1000
+ 
+ 
+    return resetToken
+ }
 
 
 export default mongoose.model("User",userSchema)
